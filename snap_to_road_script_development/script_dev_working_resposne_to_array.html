@@ -1,0 +1,169 @@
+
+
+<script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyADhS1yy_K-uU5bDojlapH-NdKWQ23SXX8",
+    authDomain: "fusion2018-1be6d.firebaseapp.com",
+    databaseURL: "https://fusion2018-1be6d.firebaseio.com",
+    projectId: "fusion2018-1be6d",
+    storageBucket: "fusion2018-1be6d.appspot.com",
+    messagingSenderId: "986913864915"
+  };
+  firebase.initializeApp(config);
+</script>
+
+
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIRB5ZsI57ivmVr7ebwCIVQKXN_mbUj9M&callback=func_map" async defer></script>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script src="csv.js"></script>
+
+<!-- https://raw.githubusercontent.com/okfn/csv.js/master/csv.js
+
+<script src="https://raw.githubusercontent.com/okfn/csv.js/master/csv.js"></script>
+
+ -->
+
+
+<script>
+
+function runSnapToRoad(path) {
+  // var pathValues = [];
+  // console.log(path);
+  // for (var i = 0; i < finalArray.length; i++) {
+    // pathValues.push(finalArray.getAt(i).toUrlValue());
+  //}
+  apiKey='AIzaSyDIRB5ZsI57ivmVr7ebwCIVQKXN_mbUj9M';
+
+  $.get('https://roads.googleapis.com/v1/snapToRoads', {
+    interpolate: true,
+    key: apiKey,
+    path: path.join('|')
+  }, function(data) {
+    processSnapToRoadResponse(data);
+  });
+}
+
+// Store snapped polyline returned by the snap-to-road service.
+function processSnapToRoadResponse(data) {
+  snappedCoordinates = [];
+  placeIdArray = [];
+  for (var i = 0; i < data.snappedPoints.length; i++) {
+    var latlng = new google.maps.LatLng(
+      data.snappedPoints[i].location.latitude,
+      data.snappedPoints[i].location.longitude);
+    snappedCoordinates.push(latlng);
+    placeIdArray.push(data.snappedPoints[i].placeId);
+  }
+}
+
+
+
+var HttpClient = function() {
+ this.get = function(aUrl, aCallback) {
+ var anHttpRequest = new XMLHttpRequest();
+ anHttpRequest.onreadystatechange = function() { 
+ if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+ aCallback(anHttpRequest.responseText);
+ }
+ anHttpRequest.open( "GET", aUrl, true ); 
+ anHttpRequest.send( null ); 
+ }
+ }
+
+
+
+function func_map(){
+d3.csv("map.csv", function(err, data) {
+
+    if (err) console.log(err) // error messages
+   // var database = firebase.database();
+    //firebase.database().ref('loc_kf_detections_case_development/').update(data)
+    //console.log(data);  
+
+    var path =data
+    //console.log(path.length)
+    //console.log(path[2].lat)
+
+
+    var coords = [];
+    for(var ii=0; ii <100 ;ii++){
+      var latlng = new google.maps.LatLng(path[ii].lat,path[ii].long);
+     
+      coords.push(latlng.toUrlValue());
+
+    }
+
+      var concat_out=coords.join('|')
+      //console.log(concat_out);
+
+
+  /// sending the request to snap to road api 
+
+var theurl ='https://roads.googleapis.com/v1/snapToRoads?path='+ coords.join('|')+'&key=AIzaSyDIRB5ZsI57ivmVr7ebwCIVQKXN_mbUj9M';
+
+
+process_response(theurl)
+
+
+
+
+     
+
+});
+
+
+}
+
+
+
+
+function process_response(theurl){
+
+var response1;
+var client = new HttpClient();
+client.get(theurl, function(response) { 
+response1 = JSON.parse(response);
+//console.log("query_worked");
+//console.log(response1); 
+var len =response1.snappedPoints.length;
+var indx;
+var list = [];
+
+
+for(indx=0;indx<len;indx++)
+    {
+   //concat_test
+   var latlong = new google.maps.LatLng(response1.snappedPoints[indx].location.latitude,response1.snappedPoints[indx].location.longitude);
+   //new  = +"," + 
+   //var str1 = response1.snappedPoints[indx].location.latitude.toUrlValue()+"," + response1.snappedPoints[indx].location.longitude.toUrlValue();
+     //str1.concat(str2, str3);
+     //console.log(latlong.toUrlValue());
+  
+      list.push(latlong.toUrlValue());
+///remove () from string 
+
+    }
+
+//console.log(list); 
+
+
+
+
+
+});
+
+}
+
+
+
+
+
+
+</script>
